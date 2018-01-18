@@ -1,0 +1,9 @@
+{   
+    "db": {
+      "host": "localhost",
+      "port": "61527",
+      "name": "infonews_db",
+      "user": "admin",
+      "password": "admin"
+    }
+}
