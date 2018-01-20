@@ -28,10 +28,6 @@ const PostSchema = new Schema({
         type: String,
         required: [true, 'Укажите содержимое статьи'],
     },
-    previewContent: {
-        type: String,
-        required: [true, 'Укажите превью-текст статьи'],
-    },
 });
 
 mongoose.model('post', PostSchema);

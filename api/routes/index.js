@@ -37,4 +37,5 @@ router.get('/postsAll', posts.postsAll);
 
 router.post('/addNewPost', posts.addNewPost);
 
+router.post('/loadFiles', posts.loadFiles);
 module.exports = router;

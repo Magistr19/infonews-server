@@ -1,4 +1,7 @@
 const mongoose = require('mongoose');
+const formidable = require('formidable');
+const fs = require('fs');
+const path = require('path');
 
 module.exports.getPostsByCategory = (req) => {
     const Posts = mongoose.model('posts');
@@ -96,4 +99,33 @@ module.exports.addNewPost = (req, res) => {
                 message: `При добавление записи произошла ошибка:  + ${err.message}`
             });
         });
+}
+module.exports.loadFiles = (req, res) => {
+    let form = new formidable.IncomingForm();
+    let upload = 'public/upload';
+    let fileName;
+    // create upload dir
+    if (!fs.existsSync(upload)) {
+        fs.mkdirSync(upload);
+      }
+    // uploading file
+    form.uploadDir = path.join(process.cwd(), upload);
+    // parsing req form
+    form.parse(req, function(err, fields, files) {
+        // get filename
+        fileName = path.join(upload, files.file.name);
+        // rename file
+        fs.rename(files.file.path, fileName, function (err) {
+            // if error - delete file
+            if (err) {
+              console.log(err);
+              fs.unlink(fileName);
+              fs.rename(files.file.path, fileName);
+            }
+            // save directory
+            let dir = 'http://localhost:3000/' + fileName;//.substr(fileName.indexOf('//'));
+            
+            res.send(dir);
+        });
+    });
 }
