@@ -23,17 +23,17 @@ router.get('/posts/:cat', (req, res) => {
         .then(result => res.send(result));
 });
 
-router.get('/lastPosts', (req, res) => {
-    posts.getLastPosts(req)
-        .then(result => res.send(result));
-});
+router.get('/lastPosts', posts.getLastPosts);
 
 router.get('/post:id', (req, res) => {
     posts.getPostById(req)
         .then(result => res.send(result));
 });
 
-router.get('/postsAll', posts.postsAll);
+router.get('/postsAll', (req, res) => {
+    posts.postsAll(req)
+        .then(result => res.send(result));
+});
 
 router.post('/addNewPost', posts.addNewPost);
 
