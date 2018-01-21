@@ -25,7 +25,7 @@ router.get('/posts/:cat', (req, res) => {
 
 router.get('/lastPosts', posts.getLastPosts);
 
-router.get('/post:id', (req, res) => {
+router.get('/post/:id', (req, res) => {
     posts.getPostById(req)
         .then(result => res.send(result));
 });
@@ -37,5 +37,10 @@ router.get('/postsAll', (req, res) => {
 
 router.post('/addNewPost', posts.addNewPost);
 
+router.put('/editPost', posts.editPost);
+
+router.delete('/removePost/:id', posts.removePost);
+
 router.post('/loadFiles', posts.loadFiles);
+
 module.exports = router;

@@ -5,12 +5,12 @@ const path = require('path');
 const fileLoad = require('express-fileupload');
 
 module.exports.getPostsByCategory = (req) => {
+
     const Posts = mongoose.model('post');
     const Category = req.params.cat;
     return new Promise(resolve => {
-        Posts.find({ category: Category })
+        Posts.find({ 'categories.link': Category }, { content: 0 })
             .then(items => {
-                console.log('Category: ', Category, 'Posts: ', items);
                 resolve(items);
             })
             .catch(e => console.error(e));
@@ -18,6 +18,7 @@ module.exports.getPostsByCategory = (req) => {
 };
 
 module.exports.getLastPosts = (req, res) => {
+
     const Posts = mongoose.model('post');
     const Categories = mongoose.model('category');
     // result array
@@ -25,22 +26,23 @@ module.exports.getLastPosts = (req, res) => {
     let currentCategoryIndex = 0;
     // async function - find posts in current category
     const findPosts = (categories) => {
-        return Posts.find({ category: categories[currentCategoryIndex].title })
+        return Posts.find({ 'categories.link': categories[currentCategoryIndex].link })
             .limit(5)
             .then(items => {
-                // concat posts in this category to result array
-                if (items.length) { posts = posts.concat(items); }
+                // concat posts in this category to result arra
+                items.map(item => console.log(item.categories.link, currentCategoryIndex));
+                posts = posts.concat(items);
                 // and go to next category
-                currentCategoryIndex++;
+                ++currentCategoryIndex;
                 // if next category exist - go find post in next category and exit from current
-                if (currentCategoryIndex < categories.length - 1) {
+                if (currentCategoryIndex < categories.length) {
                     findPosts(categories);
                     return;
                 }
                 // exit, if categories end
                 return;
             })
-            .catch(e => { console.error(e); return posts; });
+            .catch(e => { console.error(e); return; });
     };
     // main function...
     // find all categories
@@ -49,31 +51,31 @@ module.exports.getLastPosts = (req, res) => {
             if (categories) {
                 // find 5 posts in every category from categories
                 findPosts(categories)
-                    .then(() => res.status(201).json(posts))
+                    .then(() => {
+                        
+                        res.status(201).json(posts);
+                    })
                     .catch(err => {
                         res.send({
                             message: `Ой ошибка:  + ${err.message}`
                         });
                     });
             }
-            else {
-                res.status(400).json([]);
-            }
-            
+            else { res.status(400).json([]); }
         })
         .catch(err => {
             res.status(400).json({
-                message: `При добавление записи произошла ошибка:  + ${err.message}`
+                message: `При получени записей произошла ошибка:  + ${err.message}`
             });
         });
 };
 
 module.exports.getPostById = (req) => {
+
     const Posts = mongoose.model('post');
     return new Promise(resolve => {
         Posts.find({ _id: req.params.id })
             .then(items => {
-                console.log('Category: ', Category, 'Posts: ', items);
                 resolve(items);
             })
             .catch(e => console.error(e));
@@ -85,7 +87,6 @@ module.exports.postsAll = (req, res) => {
     return new Promise(resolve => {
         Posts.find()
             .then(items => {
-                console.log('Posts: ', items);
                 resolve(items);
             })
             .catch(e => console.error(e));
@@ -117,9 +118,12 @@ module.exports.addNewPost = (req, res) => {
             }
             // save directory
             let dir = 'http://localhost:3000/upload/' + files.poster.name;//.substr(fileName.indexOf('//'));
-            console.log(dir);
-            console.log(fields);
-            let newPost = new Post({ ...fields, picture: dir });
+            let newPost = new Post({
+                ...fields,
+                picture: dir,
+                categories: JSON.parse(fields.categories),
+            });
+
             //сохраняем запись в базе
             newPost
                 .save()
@@ -135,6 +139,31 @@ module.exports.addNewPost = (req, res) => {
     });
 }
 
+module.exports.editPost = (req, res) => {
+    const Posts = mongoose.model('post');
+    Posts.findByIdAndUpdate(req.body._id, req.body)
+        .then(() => {
+            return res.status(201).json({ message: 'Запись успешно обновлена!' });
+        })
+        .catch(err => {
+            res.status(400).json({
+                message: `При обновлении записи произошла ошибка:  + ${err.message}`
+            });
+        });
+}
+
+module.exports.removePost = (req, res) => {
+    const Posts = mongoose.model('post');
+    Posts.findByIdAndRemove(req.params.id)
+        .then(() => {
+            return res.status(201).json({ message: 'Запись успешно удалена' });
+        })
+        .catch(err => {
+            res.status(400).json({
+                message: `При удалении записи произошла ошибка:  + ${err.message}`
+            });
+        });
+}
 
 module.exports.loadFiles = (req, res) => {
     let form = new formidable.IncomingForm();

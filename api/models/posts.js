@@ -13,12 +13,25 @@ const PostSchema = new Schema({
         type: String,
         // required: [true, 'Укажите дату публикации'],
     },
-    category: {
-        type: String,
-        required: [true, 'Укажите основную категорию статьи'],
-    },
-    subcategory: {
-        type: String,
+    categories: {
+        title: {
+            type: String,
+            required: [true, 'Укажите основную категорию статьи'],
+        },
+        link: {
+            type: String,
+            required: [true, 'Укажите основную категорию статьи'],
+        },
+        subcategory: {
+            title: {
+                type: String,
+                required: false,
+            },
+            link: {
+                type: String,
+                required: false,
+            },
+        },
     },
     picture: {
         type: String,
@@ -28,6 +41,10 @@ const PostSchema = new Schema({
         type: String,
         required: [true, 'Укажите содержимое статьи'],
     },
+    shortcat: {
+        type: String,
+        required: [true, 'Укажите шорткат статьи'],
+    }
 });
 
 mongoose.model('post', PostSchema);
