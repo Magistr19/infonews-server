@@ -23,37 +23,42 @@ module.exports.getPostsByCategory = (req) => {
 };
 
 module.exports.getLastPosts = (req, res) => {
-
     const Posts = mongoose.model('post');
     const Categories = mongoose.model('category');
-    // create request obj
-    const findPostsRequest = (categories) => {
-        if (!categories.length) return {};
-        let request = { $or: []};
-        categories.forEach(category => {
-            request.$or.push({ 'categories.link': category.link});
-        });
-        console.log(request);
-        return request;
-    };
     // find all categories
     Categories.find()
         .then(categories => {
-            // find 5 posts in every category from categories
-            Posts.find(findPostsRequest(categories))
-                .then(posts => {
-                    res.status(201).json(posts);
+            let promises = [];
+            // create array of async func find posts in every category
+            categories.forEach(category => {
+
+                const findPostsInCategory = () => {
+                    return new Promise((resolve, reject) => {
+                        // find 5 posts in every category from categories
+                        Posts.find({ 'categories.link': category.link})
+                        .limit(5)
+                        .then(posts => resolve(posts))
+                        .catch(err => reject(err));
+                    });
+                };
+                promises.push(findPostsInCategory());
+            });
+
+            Promise.all(promises)
+                .then(arrayPosts => {
+                    let resultPosts = [];
+                    arrayPosts.map(posts => {
+                        if (posts.length) {
+                            resultPosts = resultPosts.concat(posts);
+                        } 
+                    });
+                    res.status(201).json(resultPosts);
                 })
                 .catch(err => {
-                    res.send({
-                        message: `Ой ошибка:  + ${err.message}`
+                    res.status(400).json({
+                        message: `При добавление записи произошла ошибка:  + ${err.message}`
                     });
                 });
-        })
-        .catch(err => {
-            res.status(400).json({
-                message: `При получени записей произошла ошибка:  + ${err.message}`
-            });
         });
 };
 
