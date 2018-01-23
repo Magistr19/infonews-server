@@ -2,14 +2,19 @@ const mongoose = require('mongoose');
 const formidable = require('formidable');
 const fs = require('fs');
 const path = require('path');
-const fileLoad = require('express-fileupload');
 
 module.exports.getPostsByCategory = (req) => {
 
     const Posts = mongoose.model('post');
     const Category = req.params.cat;
     return new Promise(resolve => {
-        Posts.find({ 'categories.link': Category }, { content: 0 })
+        Posts.find({ 
+                $or: [ 
+                    {'categories.link': Category },
+                    { 'categories.subcategory.link': Category }
+                ]},
+                { content: 0 }
+            )
             .then(items => {
                 resolve(items);
             })
@@ -21,47 +26,29 @@ module.exports.getLastPosts = (req, res) => {
 
     const Posts = mongoose.model('post');
     const Categories = mongoose.model('category');
-    // result array
-    let posts = [];
-    let currentCategoryIndex = 0;
-    // async function - find posts in current category
-    const findPosts = (categories) => {
-        return Posts.find({ 'categories.link': categories[currentCategoryIndex].link })
-            .limit(5)
-            .then(items => {
-                // concat posts in this category to result arra
-                items.map(item => console.log(item.categories.link, currentCategoryIndex));
-                posts = posts.concat(items);
-                // and go to next category
-                ++currentCategoryIndex;
-                // if next category exist - go find post in next category and exit from current
-                if (currentCategoryIndex < categories.length) {
-                    findPosts(categories);
-                    return;
-                }
-                // exit, if categories end
-                return;
-            })
-            .catch(e => { console.error(e); return; });
+    // create request obj
+    const findPostsRequest = (categories) => {
+        if (!categories.length) return {};
+        let request = { $or: []};
+        categories.forEach(category => {
+            request.$or.push({ 'categories.link': category.link});
+        });
+        console.log(request);
+        return request;
     };
-    // main function...
     // find all categories
     Categories.find()
         .then(categories => {
-            if (categories) {
-                // find 5 posts in every category from categories
-                findPosts(categories)
-                    .then(() => {
-                        
-                        res.status(201).json(posts);
-                    })
-                    .catch(err => {
-                        res.send({
-                            message: `Ой ошибка:  + ${err.message}`
-                        });
+            // find 5 posts in every category from categories
+            Posts.find(findPostsRequest(categories))
+                .then(posts => {
+                    res.status(201).json(posts);
+                })
+                .catch(err => {
+                    res.send({
+                        message: `Ой ошибка:  + ${err.message}`
                     });
-            }
-            else { res.status(400).json([]); }
+                });
         })
         .catch(err => {
             res.status(400).json({
@@ -188,7 +175,7 @@ module.exports.loadFiles = (req, res) => {
                 fs.rename(files.file.path, fileName);
             }
             // save directory
-            let dir = 'http://localhost:3000/' + fileName.replace('/public', '');//.substr(fileName.indexOf('//'));
+            let dir = 'http://localhost:3000/upload/' + files.file.name;//.substr(fileName.indexOf('//'));
 
             res.send(dir);
         });

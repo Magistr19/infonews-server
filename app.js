@@ -10,7 +10,7 @@ var app = express();
 var cors = require('cors');
 
 // uncomment after placing your favicon in /public
-app.use(cors({ preflightContinue:true }));
+app.use(cors({ preflightContinue: false }));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
