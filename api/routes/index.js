@@ -7,9 +7,9 @@ const posts = require('../controllers/posts');
 //Handle blog requests
 router.get('/allCategories', (req, res) => {
     categories.getAll(req)
-    .then(result => {
-        res.send(result);
-    });
+        .then(result => {
+            res.send(result);
+        });
 });
 
 router.post('/addCategory', categories.addNew);
@@ -20,17 +20,27 @@ router.delete('/removeCategory/:id', categories.removeCategory);
 
 router.get('/posts/:cat', (req, res) => {
     posts.getPostsByCategory(req)
-    .then(result => res.send(result));
+        .then(result => res.send(result));
 });
 
-router.get('/lastPosts', (req, res) => {
-    posts.getLastPosts(req)
-    .then(result => res.send(result));
-});
+router.get('/lastPosts', posts.getLastPosts);
 
-router.get('/post:id', (req, res) => {
+router.get('/post/:id', (req, res) => {
     posts.getPostById(req)
-    .then(result => res.send(result));
+        .then(result => res.send(result));
 });
+
+router.get('/postsAll', (req, res) => {
+    posts.postsAll(req)
+        .then(result => res.send(result));
+});
+
+router.post('/addNewPost', posts.addNewPost);
+
+router.put('/editPost', posts.editPost);
+
+router.delete('/removePost/:id', posts.removePost);
+
+router.post('/loadFiles', posts.loadFiles);
 
 module.exports = router;
