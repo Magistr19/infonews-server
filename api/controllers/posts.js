@@ -15,6 +15,7 @@ module.exports.getPostsByCategory = (req) => {
                 ]},
                 { content: 0 }
             )
+            .sort({ date: -1 })
             .then(items => {
                 resolve(items);
             })
@@ -37,7 +38,8 @@ module.exports.getLastPosts = (req, res) => {
                         // find 5 posts in every category from categories
                         Posts.find({ 'categories.link': category.link})
                         .limit(5)
-                        .then(posts => resolve(posts))
+                        .sort({ date: -1})
+                        .then(posts => {resolve(posts); })
                         .catch(err => reject(err));
                     });
                 };

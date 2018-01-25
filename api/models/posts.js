@@ -10,7 +10,7 @@ const PostSchema = new Schema({
         // required: [true, 'Укажите автора статьи'],
     },
     date: {
-        type: String,
+        type: Number,
         // required: [true, 'Укажите дату публикации'],
     },
     categories: {
