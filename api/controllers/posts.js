@@ -110,9 +110,20 @@ module.exports.addNewPost = (req, res) => {
 
 module.exports.editPost = (req, res) => {
     const Posts = mongoose.model('post');
-    Posts.findByIdAndUpdate(req.body._id, req.body)
-        .then(() => {
-            return res.status(201).json({ message: 'Запись успешно обновлена!' });
+    console.log(req.body, req.files[0])
+    Posts.findById(req.body._id)
+        .then((post) => {
+            console.log('Пост:', post, 'Прислано:', req.body);
+            post = req.body;
+            req.files[0] ? post.picture = `/upload/${req.files[0].originalname}`: null;
+            Posts.update(post).then(() => {
+                return res.status(201).json({ message: 'Запись успешно обновлена!' });
+            })
+            .catch(err => {
+                res.status(400).json({
+                    message: `При обновлении записи произошла ошибка:  + ${err.message}`
+                });
+            });
         })
         .catch(err => {
             res.status(400).json({
