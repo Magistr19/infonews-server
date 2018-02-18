@@ -85,16 +85,16 @@ module.exports.postsAll = (req, res) => {
 };
 
 module.exports.addNewPost = (req, res) => {
-
+    console.log('post!');
     const Post = mongoose.model('post');
-
-    let dir = '//upload/' + req.files[0].originalname;;
+    console.log(req.files, req.body);
+    let dir = '/upload/' + req.files[0].originalname;;
     let newPost = new Post({
-        ...fields,
+        ...req.body,
         picture: dir,
-        categories: JSON.parse(fields.categories),
+        categories: JSON.parse(req.body.categories),
     });
-
+    
     //сохраняем запись в базе
     newPost
         .save()
@@ -135,6 +135,6 @@ module.exports.removePost = (req, res) => {
 }
 
 module.exports.loadFiles = (req, res) => {
-    let dir = '//upload/' + req.files[0].originalname;//.substr(fileName.indexOf('//'));
+    let dir = '/upload/' + req.files[0].originalname;
     res.send(dir);
 }
