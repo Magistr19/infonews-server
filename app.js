@@ -4,6 +4,7 @@ var logger = require("morgan");
 var cookieParser = require("cookie-parser");
 var bodyParser = require("body-parser");
 const multer = require('multer');
+const compress = require('compression');
 require("./api/models/db");
 var api = require("./api/routes/index");
 
@@ -16,8 +17,17 @@ app.use(logger("dev"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "public"), {maxAge: cacheTime}));
 
+var cacheTime = 86400000 * 7; 
+// включаем gzip сжатие для статики
+app.use(compress({
+    threshold: 512
+}));
+
+// ради безопасности скрываем информацию о себе
+app.disable('x-powered-by');
+/*
 app.all("*", function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
@@ -27,7 +37,7 @@ app.all("*", function(req, res, next) {
   );
   next();
 });
-
+*/
 var storage =   multer.diskStorage({
   destination: function (req, file, callback) {
     callback(null, 'public/upload');
