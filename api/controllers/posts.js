@@ -88,7 +88,7 @@ module.exports.addNewPost = (req, res) => {
 
     const Post = mongoose.model('post');
 
-    let dir = 'http://localhost:3000/upload/' + req.files[0].originalname;;
+    let dir = '//upload/' + req.files[0].originalname;;
     let newPost = new Post({
         ...fields,
         picture: dir,
@@ -135,6 +135,6 @@ module.exports.removePost = (req, res) => {
 }
 
 module.exports.loadFiles = (req, res) => {
-    let dir = 'http://localhost:3000/upload/' + req.files[0].originalname;//.substr(fileName.indexOf('//'));
+    let dir = '//upload/' + req.files[0].originalname;//.substr(fileName.indexOf('//'));
     res.send(dir);
 }
