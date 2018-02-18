@@ -3,6 +3,7 @@ var path = require("path");
 var logger = require("morgan");
 var cookieParser = require("cookie-parser");
 var bodyParser = require("body-parser");
+const multer = require('multer');
 require("./api/models/db");
 var api = require("./api/routes/index");
 
@@ -26,6 +27,18 @@ app.all("*", function(req, res, next) {
   );
   next();
 });
+
+var storage =   multer.diskStorage({
+  destination: function (req, file, callback) {
+    callback(null, 'public/upload');
+  },
+  filename: function (req, file, callback) {
+    var imageUrl = file.originalname;
+    callback(null, imageUrl);
+  }
+});
+
+app.use(multer({ storage : storage }).any());
 
 app.use("/api", api);
 
