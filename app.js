@@ -5,6 +5,7 @@ var cookieParser = require("cookie-parser");
 var bodyParser = require("body-parser");
 const multer = require('multer');
 const compress = require('compression');
+const cors = require('cors');
 require("./api/models/db");
 var api = require("./api/routes/index");
 
