@@ -10,7 +10,6 @@ require("./api/models/db");
 var api = require("./api/routes/index");
 
 var app = express();
-var cors = require("cors");
 
 // uncomment after placing your favicon in /public
 app.use(cors({ preflightContinue: false }));
