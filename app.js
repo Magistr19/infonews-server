@@ -6,6 +6,7 @@ var bodyParser = require("body-parser");
 const multer = require('multer');
 const compress = require('compression');
 const cors = require('cors');
+const cyrToLat = require('./customModules/cyrToLat');
 require("./api/models/db");
 var api = require("./api/routes/index");
 
@@ -17,7 +18,7 @@ app.use(logger("dev"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "public"), {maxAge: cacheTime}));
+app.use(express.static(path.join(__dirname, "public")));
 
 var cacheTime = 86400000 * 7; 
 // включаем gzip сжатие для статики
@@ -25,9 +26,7 @@ app.use(compress({
     threshold: 512
 }));
 
-// ради безопасности скрываем информацию о себе
-app.disable('x-powered-by');
-/*
+
 app.all("*", function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
@@ -37,17 +36,18 @@ app.all("*", function(req, res, next) {
   );
   next();
 });
-*/
+
 var storage =   multer.diskStorage({
   destination: function (req, file, callback) {
     callback(null, 'public/upload');
   },
   filename: function (req, file, callback) {
-    var imageUrl = file.originalname;
-    callback(null, imageUrl);
-  }
-});
+    var filename = cyrToLat(file.originalname);
+    callback(null, filename);
+  },
 
+});
+console.log(cyrToLat('Привет мир'));
 app.use(multer({ storage : storage }).any());
 
 app.use("/api", api);

@@ -48,6 +48,7 @@ module.exports.getLastPosts = (req, res) => {
                     let resultPosts = [];
                     arrayPosts.map(posts => {
                         if (posts.length) {
+                            console.log(posts);
                             resultPosts = resultPosts.concat(posts);
                         } 
                     });
@@ -87,13 +88,15 @@ module.exports.postsAll = (req, res) => {
 module.exports.addNewPost = (req, res) => {
     console.log('post!');
     const Post = mongoose.model('post');
-    console.log(req.files, req.body);
-    let dir = '/upload/' + req.files[0].originalname;;
+    console.log(req.files);
+    let dir = '/upload/' + req.files[0].filename;
+    const parsedData = JSON.parse(req.body.data);
     let newPost = new Post({
-        ...req.body,
+        ...parsedData,
+        content: parsedData.HTML,
         picture: dir,
-        categories: JSON.parse(req.body.categories),
     });
+    console.log(newPost);
     
     //сохраняем запись в базе
     newPost
@@ -106,30 +109,29 @@ module.exports.addNewPost = (req, res) => {
                 message: `При добавление записи произошла ошибка:  + ${err.message}`
             });
         });
+        
 }
 
 module.exports.editPost = (req, res) => {
     const Posts = mongoose.model('post');
-    console.log(req.body, req.files[0])
-    Posts.findById(req.body._id)
-        .then((post) => {
-            console.log('Пост:', post, 'Прислано:', req.body);
-            post = req.body;
-            req.files[0] ? post.picture = `/upload/${req.files[0].originalname}`: null;
-            Posts.update(post).then(() => {
-                return res.status(201).json({ message: 'Запись успешно обновлена!' });
-            })
-            .catch(err => {
-                res.status(400).json({
-                    message: `При обновлении записи произошла ошибка:  + ${err.message}`
-                });
-            });
-        })
-        .catch(err => {
-            res.status(400).json({
-                message: `При обновлении записи произошла ошибка:  + ${err.message}`
-            });
+    console.log('File: ', req.files[0])
+    console.log('Body: ', req.body, req.params.id);
+    const parsedData = JSON.parse(req.body.data);
+    Posts.findByIdAndUpdate(req.params.id, {
+        
+        ...parsedData,
+        content: parsedData.HTML,
+        picture: req.files[0] ? `/upload/${req.files[0].filename}`: parsedData.picture,
+    
+    })
+    .then(() => {
+        return res.status(201).json({ message: 'Запись успешно обновлена!' });
+    })
+    .catch(err => {
+        res.status(400).json({
+            message: `При обновлении записи произошла ошибка:  + ${err.message}`
         });
+    });
 }
 
 module.exports.removePost = (req, res) => {
@@ -146,6 +148,6 @@ module.exports.removePost = (req, res) => {
 }
 
 module.exports.loadFiles = (req, res) => {
-    let dir = '/upload/' + req.files[0].originalname;
+    let dir = '/upload/' + req.files[0].filename;
     res.send(dir);
 }
