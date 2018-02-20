@@ -25,11 +25,11 @@ const PostSchema = new Schema({
         subcategory: {
             title: {
                 type: String,
-                required: false,
+                default: '',
             },
             link: {
                 type: String,
-                required: false,
+                default: '',
             },
         },
     },

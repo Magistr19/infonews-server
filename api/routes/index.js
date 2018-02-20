@@ -37,7 +37,7 @@ router.get('/postsAll', (req, res) => {
 
 router.post('/addNewPost', posts.addNewPost);
 
-router.put('/editPost', posts.editPost);
+router.put('/editPost/:id', posts.editPost);
 
 router.delete('/removePost/:id', posts.removePost);
 
