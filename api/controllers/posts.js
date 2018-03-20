@@ -1,8 +1,10 @@
 const mongoose = require('mongoose');
+const jwt = require('jwt-simple');
+const config = require('../../config.json')
+const Posts = mongoose.model('post');
+const Categories = mongoose.model('category');
 
 module.exports.getPostsByCategory = (req) => {
-
-  const Posts = mongoose.model('post');
   const Category = req.params.cat;
   return new Promise(resolve => {
     Posts.find({ $or: [{ 'categories.link': Category }, { 'categories.subcategory.link': Category }]},
@@ -14,15 +16,12 @@ module.exports.getPostsByCategory = (req) => {
 };
 
 module.exports.getLastPosts = (req, res) => {
-  const Posts = mongoose.model('post');
-  const Categories = mongoose.model('category');
   // find all categories
   Categories.find()
     .then(categories => {
       let promises = [];
       // create array of async func find posts in every category
       categories.forEach(category => {
-
         const findPostsInCategory = () => {
           return new Promise((resolve, reject) => {
             // find 5 posts in every category from categories
@@ -41,7 +40,6 @@ module.exports.getLastPosts = (req, res) => {
           let resultPosts = [];
           arrayPosts.map(posts => {
             if (posts.length) {
-              console.log(posts);
               resultPosts = resultPosts.concat(posts);
             }
           });
@@ -56,8 +54,6 @@ module.exports.getLastPosts = (req, res) => {
 };
 
 module.exports.getPostById = (req) => {
-
-  const Posts = mongoose.model('post');
   return new Promise(resolve => {
     Posts.find({ _id: req.params.id })
       .then(items => {
@@ -68,9 +64,9 @@ module.exports.getPostById = (req) => {
 };
 
 module.exports.postsAll = (req, res) => {
-  const Posts = mongoose.model('post');
+  const token = jwt.decode(req.headers['token'], config.token.secretKey)
   return new Promise(resolve => {
-    Posts.find()
+    Posts.find(token.role === 'Admin' ? {} : { author: token.author })
       .then(items => {
         resolve(items);
       })
@@ -79,9 +75,7 @@ module.exports.postsAll = (req, res) => {
 };
 
 module.exports.addNewPost = (req, res) => {
-  console.log('post!');
   const Post = mongoose.model('post');
-  console.log(req.files);
   let dir = '/upload/' + req.files[0].filename;
   const parsedData = JSON.parse(req.body.data);
   let newPost = new Post({
@@ -89,7 +83,6 @@ module.exports.addNewPost = (req, res) => {
     content: parsedData.HTML,
     picture: dir,
   });
-  console.log(newPost);
 
   //сохраняем запись в базе
   newPost
@@ -107,15 +100,11 @@ module.exports.addNewPost = (req, res) => {
 
 module.exports.editPost = (req, res) => {
   const Posts = mongoose.model('post');
-  console.log('File: ', req.files[0])
-  console.log('Body: ', req.body, req.params.id);
   const parsedData = JSON.parse(req.body.data);
   Posts.findByIdAndUpdate(req.params.id, {
-
     ...parsedData,
     content: parsedData.HTML,
     picture: req.files[0] ? `/upload/${req.files[0].filename}` : parsedData.picture,
-
   })
     .then(() => {
       return res.status(201).json({ message: 'Запись успешно обновлена!' });

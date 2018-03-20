@@ -13,7 +13,8 @@ module.exports.logIn = (req, res) => {
                 const token = jwt.encode({
                     isAuth: true,
                     role: user.role,
-                    id: user._id
+                    id: user._id,
+                    author: user.name,
                 }, config.token.secretKey)
 
                 res.status(200).json({ message:'Вы успешно авторизовались!', token });

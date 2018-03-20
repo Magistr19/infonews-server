@@ -7,9 +7,7 @@ const jwt = require('jwt-simple');
 const config = require('../../config.json')
 
 module.exports.getCurrentUser = (req, res) => {
-    console.log(req.headers)
     const id = jwt.decode(req.headers['token'], config.token.secretKey).id;
-    console.log(id)
     Users.findById(id, { hash: 0, salt: 0})
         .then(user => res.status(201).json(user))
         .catch(e => res.status(400).json({ message: e.message }))
@@ -42,10 +40,7 @@ module.exports.createNewUser = (req, res) => {
         role: 'Author'
     })
     newUser.save()
-        .then(() => {
-            console.log('Success')
-            return mailer(userData)
-        })
+        .then(() => mailer(userData))
         .then(message => {
             res.status(200).json({ message })
         })
