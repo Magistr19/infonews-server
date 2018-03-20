@@ -29,28 +29,19 @@ app.use(compress({
     threshold: 512
 }));
 
+// Allow crossdomain requests
+app.use(cors())
 
-app.all("*", function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+app.all('*', function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*')
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
   res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
-  );
-  next();
-});
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept, token'
+  )
+  next()
+})
 
-app.use(session({
-  secret: 'secret',
-  cookie: {
-    path: '/',
-    httpOnly: true,
-    maxAge: null
-  },
-  saveUninitialized: false,
-  resave: false,
-  store: new MongoStore({mongooseConnection: mongoose.connection})
-}));
 
 var storage =   multer.diskStorage({
   destination: function (req, file, callback) {

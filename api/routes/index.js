@@ -6,18 +6,25 @@ const posts = require('../controllers/posts');
 const auth = require('../controllers/auth');
 const users = require('../controllers/users');
 
+const jwt = require('jwt-simple');
+const config = require('../../config.json')
+
 const isAuth = (req, res, next) => {
-    if (req.session.isAuth) {
+    if (!req.headers['token']) {
+        res.sendStatus(403)
+    } else if (jwt.decode(req.headers['token'], config.token.secretKey).isAuth) {
         next()
     } else {
-        res.sendStatus(403)
+        res.sendStatus(401)
     }
 }
 const isAdmin = (req, res, next) => {
-    if (req.session.role === 'Admin') {
+    if (!req.headers['token']) {
+        res.sendStatus(403)
+    } else if (jwt.decode(req.headers['token'], config.token.secretKey).role === 'Admin') {
         next()
     } else {
-        res.sendStatus(403)
+        res.sendStatus(401)
     }
 }
 //

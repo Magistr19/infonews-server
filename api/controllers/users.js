@@ -3,9 +3,14 @@ const Users = mongoose.model('Users');
 const setPassword = require('../../customModules/cryptoPass').setPassword;
 const randomizer = require('../../customModules/randomizer');
 const mailer = require('./mailer');
+const jwt = require('jwt-simple');
+const config = require('../../config.json')
 
 module.exports.getCurrentUser = (req, res) => {
-    Users.findById(req.session.id, { hash: 0, salt: 0})
+    console.log(req.headers)
+    const id = jwt.decode(req.headers['token'], config.token.secretKey).id;
+    console.log(id)
+    Users.findById(id, { hash: 0, salt: 0})
         .then(user => res.status(201).json(user))
         .catch(e => res.status(400).json({ message: e.message }))
 }
