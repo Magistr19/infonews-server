@@ -5,6 +5,9 @@ var cookieParser = require("cookie-parser");
 var bodyParser = require("body-parser");
 const multer = require('multer');
 const compress = require('compression');
+const mongoose = require('mongoose')
+const session = require('express-session');
+const MongoStore = require('connect-mongo')(session);
 const cors = require('cors');
 const cyrToLat = require('./customModules/cyrToLat');
 require("./api/models/db");
@@ -37,6 +40,18 @@ app.all("*", function(req, res, next) {
   next();
 });
 
+app.use(session({
+  secret: 'secret',
+  cookie: {
+    path: '/',
+    httpOnly: true,
+    maxAge: null
+  },
+  saveUninitialized: false,
+  resave: false,
+  store: new MongoStore({mongooseConnection: mongoose.connection})
+}));
+
 var storage =   multer.diskStorage({
   destination: function (req, file, callback) {
     callback(null, 'public/upload');
@@ -47,7 +62,9 @@ var storage =   multer.diskStorage({
   },
 
 });
+
 console.log(cyrToLat('Привет мир'));
+
 app.use(multer({ storage : storage }).any());
 
 app.use("/api", api);
