@@ -41,3 +41,4 @@ process.on('SIGINT', function () {
 // require post db model
 require('./category');
 require('./posts');
+require('./users');

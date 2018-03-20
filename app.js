@@ -5,6 +5,9 @@ var cookieParser = require("cookie-parser");
 var bodyParser = require("body-parser");
 const multer = require('multer');
 const compress = require('compression');
+const mongoose = require('mongoose')
+const session = require('express-session');
+const MongoStore = require('connect-mongo')(session);
 const cors = require('cors');
 const cyrToLat = require('./customModules/cyrToLat');
 require("./api/models/db");
@@ -26,16 +29,19 @@ app.use(compress({
     threshold: 512
 }));
 
+// Allow crossdomain requests
+app.use(cors())
 
-app.all("*", function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+app.all('*', function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*')
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
   res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
-  );
-  next();
-});
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept, token'
+  )
+  next()
+})
+
 
 var storage =   multer.diskStorage({
   destination: function (req, file, callback) {
@@ -47,7 +53,9 @@ var storage =   multer.diskStorage({
   },
 
 });
+
 console.log(cyrToLat('Привет мир'));
+
 app.use(multer({ storage : storage }).any());
 
 app.use("/api", api);
