@@ -12,7 +12,7 @@ const cors = require('cors');
 const cyrToLat = require('./customModules/cyrToLat');
 require("./api/models/db");
 var api = require("./api/routes/index");
-
+const geoip = require('geoip-lite');
 var app = express();
 
 // uncomment after placing your favicon in /public
@@ -22,6 +22,19 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+
+app.use(session({
+  secret: 'ascold',
+  cookie: {
+    path: '/',
+    httpOnly: true,
+    maxAge: null
+  },
+  saveUninitialized: false,
+  resave: false,
+  store: new MongoStore({mongooseConnection: mongoose.connection})
+}));
+
 
 var cacheTime = 86400000 * 7; 
 // включаем gzip сжатие для статики
@@ -61,6 +74,8 @@ app.use(multer({ storage : storage }).any());
 app.use("/api", api);
 
 app.use("/", (req, res) => {
+  req.session.ip = req.ip;
+  req.session.geo = JSON.stringify(geoip.lookup(req.ip))
   res.sendFile(path.resolve(__dirname, "./public", "index.html"));
 });
 
