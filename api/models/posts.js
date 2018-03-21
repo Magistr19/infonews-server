@@ -13,6 +13,10 @@ const PostSchema = new Schema({
         type: Number,
         // required: [true, 'Укажите дату публикации'],
     },
+    views: {
+        type: Number,
+        default: 0
+    },
     categories: {
         title: {
             type: String,

@@ -4,6 +4,7 @@ const config = require('../../config.json')
 const Posts = mongoose.model('post');
 const Categories = mongoose.model('category');
 
+
 module.exports.getPostsByCategory = (req) => {
   const Category = req.params.cat;
   return new Promise(resolve => {
@@ -54,10 +55,13 @@ module.exports.getLastPosts = (req, res) => {
 };
 
 module.exports.getPostById = (req) => {
+  console.log(req.session.ip, JSON.parse(req.session.geo))
   return new Promise(resolve => {
-    Posts.find({ _id: req.params.id })
-      .then(items => {
-        resolve(items);
+    Posts.findById(req.params.id)
+      .then(post => {
+        post.views++;
+        post.save();
+        resolve(post);
       })
       .catch(e => console.error(e));
   });
