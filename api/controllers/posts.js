@@ -6,11 +6,14 @@ const Categories = mongoose.model('category');
 
 
 module.exports.getPostsByCategory = (req) => {
+  console.log(req.query)
   const Category = req.params.cat;
   return new Promise(resolve => {
     Posts.find({ $or: [{ 'categories.link': Category }, { 'categories.subcategory.link': Category }]},
       { content: 0 })
       .sort({ date: -1 })
+      .skip(+req.query.from)
+      .limit(+req.query.to - +req.query.from)
       .then(items => resolve(items))
       .catch(e => console.error(e));
   });
@@ -55,12 +58,13 @@ module.exports.getLastPosts = (req, res) => {
 };
 
 module.exports.getPostById = (req) => {
-  console.log(req.session.ip, JSON.parse(req.session.geo))
+
   return new Promise(resolve => {
     Posts.findById(req.params.id)
       .then(post => {
         post.views++;
         post.save();
+        console.log('Post exist')
         resolve(post);
       })
       .catch(e => console.error(e));
