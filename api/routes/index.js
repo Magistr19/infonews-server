@@ -50,6 +50,7 @@ router.get('/posts/:cat', (req, res) => {
 router.get('/lastPosts', posts.getLastPosts);
 
 router.get('/post/:id', (req, res) => {
+    console.log('GetPost!')
     posts.getPostById(req)
         .then(result => res.send(result));
 });
