@@ -22,7 +22,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
-
+app.use(express.static(path.join(__dirname, "public/dist")));
 app.use(session({
   secret: 'ascold',
   cookie: {
@@ -76,7 +76,7 @@ app.use("/api", api);
 app.use("/", (req, res) => {
   req.session.ip = req.ip;
   req.session.geo = JSON.stringify(geoip.lookup(req.ip))
-  res.sendFile(path.resolve(__dirname, "./public", "index.html"));
+  res.sendFile(path.resolve(__dirname, "./public/dist", "index.html"));
 });
 
 

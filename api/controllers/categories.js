@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 module.exports.getAll = (req) => {
     const Category = mongoose.model('category');
     return new Promise(resolve => {
-        Category.find().then(items => {
+        Category.find({}, { __v:0 }).then(items => {
             resolve(items);
         })
             .catch(e => console.error(e));
@@ -49,7 +49,7 @@ module.exports.removeCategory = (req, res) => {
     Category.findByIdAndRemove(req.params.id)
         .then(item => {
             if (!!item) {
-                res.status(200).json({ message: 'Запись успешно обновлена' });
+                res.status(200).json({ message: 'Запись успешно удалена' });
             } else {
                 res.status(404).json({ message: 'Запись в БД не обнаружена' });
             }

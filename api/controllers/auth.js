@@ -6,9 +6,9 @@ const config = require('../../config.json')
 
 module.exports.logIn = (req, res) => {
     console.log(req.body)
-    Users.findOne({ login: req.body.userLogin })
+    Users.findOne({ login: req.body.login })
         .then(user => {
-            if (validPass(user.hash, user.salt, req.body.userPassword)) {
+            if (validPass(user.hash, user.salt, req.body.password)) {
                 // create token
                 const token = jwt.encode({
                     isAuth: true,

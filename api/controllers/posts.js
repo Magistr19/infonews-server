@@ -62,8 +62,10 @@ module.exports.getPostById = (req) => {
   return new Promise(resolve => {
     Posts.findById(req.params.id)
       .then(post => {
-        post.views++;
-        post.save();
+        if (!req.headers['token']) {
+          post.views++;
+          post.save();
+        }
         console.log('Post exist')
         resolve(post);
       })
@@ -74,7 +76,7 @@ module.exports.getPostById = (req) => {
 module.exports.postsAll = (req, res) => {
   const token = jwt.decode(req.headers['token'], config.token.secretKey)
   return new Promise(resolve => {
-    Posts.find(token.role === 'Admin' ? {} : { author: token.author })
+    Posts.find(token.role === 'Admin' ? {} : { author: token.author }, { content: 0 })
       .then(items => {
         resolve(items);
       })
@@ -83,13 +85,18 @@ module.exports.postsAll = (req, res) => {
 };
 
 module.exports.addNewPost = (req, res) => {
+  console.log('AddPost')
+  const token = jwt.decode(req.headers['token'], config.token.secretKey)
+  console.log(token)
+  try {
   const Post = mongoose.model('post');
   let dir = '/upload/' + req.files[0].filename;
-  const parsedData = JSON.parse(req.body.data);
   let newPost = new Post({
-    ...parsedData,
-    content: parsedData.HTML,
+    ...req.body,
+    categories: JSON.parse(req.body.categories),
     picture: dir,
+    date: Date.now(),
+    author: token.author
   });
 
   //сохраняем запись в базе
@@ -103,16 +110,16 @@ module.exports.addNewPost = (req, res) => {
         message: `При добавление записи произошла ошибка:  + ${err.message}`
       });
     });
-
+  } catch (e) { console.log(e) }
 }
 
 module.exports.editPost = (req, res) => {
   const Posts = mongoose.model('post');
-  const parsedData = JSON.parse(req.body.data);
   Posts.findByIdAndUpdate(req.params.id, {
-    ...parsedData,
-    content: parsedData.HTML,
-    picture: req.files[0] ? `/upload/${req.files[0].filename}` : parsedData.picture,
+    ...req.body,
+    categories: JSON.parse(req.body.categories),
+    picture: req.files[0] ? `/upload/${req.files[0].filename}` : req.body.picture,
+    date: Date.now()
   })
     .then(() => {
       return res.status(201).json({ message: 'Запись успешно обновлена!' });
