@@ -42,7 +42,7 @@ module.exports.createNewUser = (req, res) => {
     newUser.save()
         .then(() => mailer(userData))
         .then(message => {
-            res.status(200).json({ message })
+            res.status(200).json({ message: 'Автор успішно створен!' })
         })
         .catch(e => {
             console.log(e.message);
