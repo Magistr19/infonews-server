@@ -41,11 +41,12 @@ module.exports.createNewUser = (req, res) => {
     })
     newUser.save()
         .then(() => mailer(userData))
-        .then(message => {
-            res.status(200).json({ message: 'Автор успішно створен!' })
-        })
-        .catch(e => {
-            console.log(e.message);
-            res.status(400).json({ message: e.message });
-        })
+        .then(message => res.status(200).json({ message: 'Автор успішно створен!' }))
+        .catch(e => res.status(400).json({ message: e.message }))
+}
+
+module.exports.deleteUser = (req, res) => {
+    Users.findByIdAndRemove(req.params.id)
+        .then(() => res.status(200).json({ message: 'Автор успішно видален!' }))
+        .catch(e => res.status(400).json({ message: e.message }))
 }

@@ -44,7 +44,8 @@ router.delete('/removeCategory/:id', categories.removeCategory);
 
 router.get('/posts/:cat', (req, res) => {
     posts.getPostsByCategory(req)
-        .then(result => res.send(result));
+        .then(result => res.send(result))
+        .catch(e => res.send([]))
 });
 
 router.get('/lastPosts', posts.getLastPosts);
@@ -74,6 +75,7 @@ router.post('/logOut', auth.logOut);
 router.get('/getCurrentUser', users.getCurrentUser);
 router.get('/getAllUsers', users.getAllUsers);
 router.post('/createNewUser', users.createNewUser);
+router.delete('/deleteUser/:id', users.deleteUser)
 
 
 module.exports = router;
