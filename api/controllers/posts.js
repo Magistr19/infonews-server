@@ -6,17 +6,34 @@ const Categories = mongoose.model('category');
 
 
 module.exports.getPostsByCategory = (req) => {
-  console.log(req.query)
   const Category = req.params.cat;
-  return new Promise(resolve => {
-    Posts.find({ $or: [{ 'categories.link': Category }, { 'categories.subcategory.link': Category }]},
+  let sort = {}
+  switch(req.query.sort) {
+    case 'new': {
+      sort =  { date: -1 }
+      break
+    }
+    case 'old': {
+      sort =  { date: 1 }
+      break
+    }
+    case 'popular': {
+      sort =  { views: -1 }
+      break
+    }
+    default: {
+      sort =  { date: -1 }
+      break
+    }
+  }
+
+  return Posts.find({ $or: [{ 'categories.link': Category }, { 'categories.subcategory.link': Category }]},
       { content: 0 })
-      .sort({ date: -1 })
+      .sort(sort)
       .skip(+req.query.from)
       .limit(+req.query.to - +req.query.from)
-      .then(items => resolve(items))
-      .catch(e => console.error(e));
-  });
+      .then(items => items)
+      .catch(e => { throw new Error(e) });
 };
 
 module.exports.getLastPosts = (req, res) => {
