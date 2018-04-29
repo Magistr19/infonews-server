@@ -91,13 +91,39 @@ module.exports.getPostById = (req) => {
 };
 
 module.exports.postsAll = (req, res) => {
-  const token = jwt.decode(req.headers['token'], config.token.secretKey)
-  return new Promise(resolve => {
-    Posts.find(token.role === 'Admin' ? {} : { author: token.author }, { content: 0 })
+  const query = {}
+  if (req.headers['token']) {
+    const token = jwt.decode(req.headers['token'], config.token.secretKey)
+    token.role !== 'Admin' ? query = { author: token.author } : null
+  }
+  let sort = {}
+  switch(req.query.sort) {
+    case 'new': {
+      sort =  { date: -1 }
+      break
+    }
+    case 'old': {
+      sort =  { date: 1 }
+      break
+    }
+    case 'popular': {
+      sort =  { views: -1 }
+      break
+    }
+    default: {
+      sort =  { date: -1 }
+      break
+    }
+  }
+  return new Promise((resolve, reject) => {
+    Posts.find(query, { content: 0 })
+      .sort(sort)
+      .skip(+req.query.from)
+      .limit(+req.query.to - +req.query.from)
       .then(items => {
         resolve(items);
       })
-      .catch(e => console.error(e));
+      .catch(e => reject(e));
   })
 };
 
@@ -105,7 +131,6 @@ module.exports.addNewPost = (req, res) => {
   console.log('AddPost')
   const token = jwt.decode(req.headers['token'], config.token.secretKey)
   console.log(token)
-  try {
   const Post = mongoose.model('post');
   let dir = '/upload/' + req.files[0].filename;
   let newPost = new Post({
@@ -127,7 +152,6 @@ module.exports.addNewPost = (req, res) => {
         message: `При добавление записи произошла ошибка:  + ${err.message}`
       });
     });
-  } catch (e) { console.log(e) }
 }
 
 module.exports.editPost = (req, res) => {
